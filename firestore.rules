@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function userEmail() {
+      return request.auth.token.email;
+    }
+    function userDoc() {
+      return get(/databases/$(database)/documents/Usuarios/$(userEmail()));
+    }
+    function isActive() {
+      return userDoc().data != null && userDoc().data.activo == true;
+    }
+    function hasRole(role) {
+      return userDoc().data != null && userDoc().data.rol == role;
+    }
+    function isAdmin() {
+      return hasRole("Administrador");
+    }
+    function isMod() {
+      return hasRole("Moderador");
+    }
+    function isUser() {
+      return hasRole("Usuario");
+    }
+
+    match /Empresas/{empresaId} {
+      allow read: if resource.data.activa == true || (signedIn() && isActive());
+      allow create, update: if signedIn() && isActive() && (isAdmin() || isMod());
+      allow delete: if signedIn() && isActive() && isAdmin();
+    }
+
+    match /Vacantes/{vacanteId} {
+      allow read, create, update: if signedIn() && isActive() && (isAdmin() || isMod());
+      allow delete: if signedIn() && isActive() && isAdmin();
+    }
+
+    match /Usuarios/{userId} {
+      allow get: if signedIn() && isActive() && (userEmail() == userId || isAdmin() || isMod());
+      allow list: if signedIn() && isActive() && (isAdmin() || isMod());
+      allow create, update: if signedIn() && isActive() && (isAdmin() || isMod());
+      allow delete: if signedIn() && isActive() && isAdmin();
+    }
+  }
+}

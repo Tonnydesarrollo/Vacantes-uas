@@ -1,0 +1,30 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "Vacantes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "facultad", "order": "ASCENDING" },
+        { "fieldPath": "estado", "order": "ASCENDING" },
+        { "fieldPath": "fechaVencimiento", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "Vacantes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "facultad", "order": "ASCENDING" },
+        { "fieldPath": "fechaAlta", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "Empresas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "facultad", "order": "ASCENDING" },
+        { "fieldPath": "fechaVencimiento", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
