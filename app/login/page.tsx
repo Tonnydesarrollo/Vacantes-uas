@@ -2,8 +2,20 @@
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../src/lib/firebase";
 import Particles from "../../components/particles";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useAuth } from "../../src/context/AuthContext";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      router.replace("/dashboard");
+    }
+  }, [user, router]);
+
   const handleLogin = async () => {
     const provider = new GoogleAuthProvider();
     await signInWithPopup(auth, provider);
