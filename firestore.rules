@@ -8,7 +8,10 @@ service cloud.firestore {
       return request.auth.token.email;
     }
     function userDoc() {
-      return get(/databases/$(database)/documents/Usuarios/$(userEmail()));
+      return resource != null && resource.__name__ ==
+        /databases/$(database)/documents/Usuarios/$(userEmail())
+        ? resource
+        : get(/databases/$(database)/documents/Usuarios/$(userEmail()));
     }
     function isActive() {
       return userDoc().data != null && userDoc().data.activo == true;
@@ -38,7 +41,9 @@ service cloud.firestore {
     }
 
     match /Usuarios/{userId} {
-      allow get: if signedIn() && isActive() && (userEmail() == userId || isAdmin() || isMod());
+      allow get: if signedIn() &&
+        (userEmail() == userId ||
+          (isActive() && (isAdmin() || isMod())));
       allow list: if signedIn() && isActive() && (isAdmin() || isMod());
       allow create, update: if signedIn() && isActive() && (isAdmin() || isMod());
       allow delete: if signedIn() && isActive() && isAdmin();
