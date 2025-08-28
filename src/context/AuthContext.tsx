@@ -51,17 +51,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     const ref = doc(db, "Usuarios", u.email);
-    const snap = await getDoc(ref);
-    if (!snap.exists() || !snap.data().activo) {
+    try {
+      const snap = await getDoc(ref);
+      if (!snap.exists() || !snap.data().activo) {
+        await signOut(auth);
+        clearSession();
+        alert("No autorizado, contacta al administrador");
+        return;
+      }
+      const data = snap.data() as Perfil;
+      setUser(u);
+      setPerfil(data);
+      document.cookie = `session=${u.email}; path=/`;
+    } catch (error) {
       await signOut(auth);
       clearSession();
-      alert("No autorizado, contacta al administrador");
-      return;
+      alert("Error verificando al usuario, intenta de nuevo");
     }
-    const data = snap.data() as Perfil;
-    setUser(u);
-    setPerfil(data);
-    document.cookie = `session=${u.email}; path=/`;
   };
 
   useEffect(() => {
