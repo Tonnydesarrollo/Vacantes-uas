@@ -32,8 +32,16 @@ const assertAdmin = (actor: Usuario) => {
 };
 
 export async function getPerfilByEmail(email: string): Promise<Usuario | null> {
-  const snap = await getDoc(doc(db, COL, email));
-  return snap.exists() ? (snap.data() as Usuario) : null;
+  const ref = doc(db, COL, email);
+  const snap = await getDoc(ref);
+  if (snap.exists()) return snap.data() as Usuario;
+
+  const q = query(collection(db, COL), where("email", "==", email), limitQuery(1));
+  const qsnap = await getDocs(q);
+  if (!qsnap.empty) {
+    return qsnap.docs[0].data() as Usuario;
+  }
+  return null;
 }
 
 export async function listUsuarios(opts?: {
