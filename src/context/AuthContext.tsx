@@ -7,18 +7,13 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../lib/firebase";
-
-type Perfil = {
-  rol: string;
-  facultad: string;
-  activo: boolean;
-};
+import { auth } from "../lib/firebase";
+import { getPerfilByEmail } from "../services/usuarios";
+import type { Usuario } from "../types";
 
 type AuthContextProps = {
   user: User | null;
-  perfil: Perfil | null;
+  perfil: Usuario | null;
   loading: boolean;
   signInGoogle: () => Promise<void>;
   signOutApp: () => Promise<void>;
@@ -34,7 +29,7 @@ export const useAuth = () => {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [perfil, setPerfil] = useState<Perfil | null>(null);
+  const [perfil, setPerfil] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
 
   const clearSession = () => {
@@ -50,16 +45,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       alert("No autorizado, contacta al administrador");
       return;
     }
-    const ref = doc(db, "Usuarios", u.email);
     try {
-      const snap = await getDoc(ref);
-      if (!snap.exists() || !snap.data().activo) {
+      const data = await getPerfilByEmail(u.email);
+      if (!data || !data.activo) {
         await signOut(auth);
         clearSession();
         alert("No autorizado, contacta al administrador");
         return;
       }
-      const data = snap.data() as Perfil;
       setUser(u);
       setPerfil(data);
       document.cookie = `session=${u.email}; path=/`;
