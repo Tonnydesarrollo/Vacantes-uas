@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const verifyUser = async (u: User) => {
     if (!u.email) {
-      await signOut(auth);
+      await signOut(auth).catch(console.error);
       clearSession();
       alert("No autorizado, contacta al administrador");
       return;
@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const data = await getPerfilByEmail(u.email);
       if (!data || !data.activo) {
-        await signOut(auth);
+        await signOut(auth).catch(console.error);
         clearSession();
         alert("No autorizado, contacta al administrador");
         return;
@@ -57,7 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPerfil(data);
       document.cookie = `session=${u.email}; path=/`;
     } catch (error) {
-      await signOut(auth);
+      console.error(error);
+      await signOut(auth).catch(console.error);
       clearSession();
       alert("Error verificando al usuario, intenta de nuevo");
     }
