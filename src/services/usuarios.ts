@@ -32,15 +32,10 @@ const assertAdmin = (actor: Usuario) => {
 };
 
 export async function getPerfilByEmail(email: string): Promise<Usuario | null> {
-  const q = query(
-    collection(db, COL),
-    where("email", "==", email),
-    limitQuery(1)
-  );
-  const qsnap = await getDocs(q);
-  if (!qsnap.empty) {
-    const docSnap = qsnap.docs[0];
-    return { ...(docSnap.data() as Usuario) };
+  const ref = doc(db, COL, email);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    return { ...(snap.data() as Usuario) };
   }
   return null;
 }
