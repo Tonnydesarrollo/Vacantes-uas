@@ -32,14 +32,15 @@ const assertAdmin = (actor: Usuario) => {
 };
 
 export async function getPerfilByEmail(email: string): Promise<Usuario | null> {
-  const ref = doc(db, COL, email);
-  const snap = await getDoc(ref);
-  if (snap.exists()) return snap.data() as Usuario;
-
-  const q = query(collection(db, COL), where("email", "==", email), limitQuery(1));
+  const q = query(
+    collection(db, COL),
+    where("email", "==", email),
+    limitQuery(1)
+  );
   const qsnap = await getDocs(q);
   if (!qsnap.empty) {
-    return qsnap.docs[0].data() as Usuario;
+    const docSnap = qsnap.docs[0];
+    return { ...(docSnap.data() as Usuario) };
   }
   return null;
 }
@@ -67,10 +68,7 @@ export async function listUsuarios(opts?: {
 
   const q = query(collection(db, COL), ...constraints);
   const snap = await getDocs(q);
-  const items = snap.docs.map((d) => ({
-    ...(d.data() as Usuario),
-    email: d.id,
-  }));
+  const items = snap.docs.map((d) => d.data() as Usuario);
 
   const last = snap.docs[snap.docs.length - 1];
   const nextPageCursor = snap.docs.length === pageLimit ? last?.id : undefined;
